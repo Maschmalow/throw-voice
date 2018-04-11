@@ -1,7 +1,7 @@
 package tech.gdragon.commands;
 
 import tech.gdragon.DiscordBot;
-import tech.gdragon.configuration.ServerSettings;
+import tech.gdragon.configuration.GuildSettings;
 
 import java.util.HashMap;
 
@@ -10,7 +10,7 @@ public class CommandHandler {
     public static HashMap<String, Command> commands = new HashMap<>();
 
     public static void handleCommand(CommandParser.CommandContainer cmd) {
-        ServerSettings settings = DiscordBot.serverSettings.get(cmd.e.getGuild().getId());
+        GuildSettings settings = DiscordBot.serverSettings.get(cmd.e.getGuild().getId());
 
         if (commands.containsKey(cmd.invoke.toLowerCase()) || settings.aliases.containsKey(cmd.invoke.toLowerCase())) {
 

@@ -6,7 +6,7 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ServerSettings {
+public class GuildSettings {
 
     public HashMap<String, Integer> autoJoinSettings;
     public HashMap<String, Integer> autoLeaveSettings;
@@ -17,7 +17,7 @@ public class ServerSettings {
     public double volume;
     public String defaultTextChannel;
 
-    public ServerSettings(Guild g) {
+    public GuildSettings(Guild g) {
         this.autoJoinSettings = new HashMap<>(g.getVoiceChannels().size());
         this.autoLeaveSettings = new HashMap<>(g.getVoiceChannels().size());
         this.aliases = new HashMap<>();

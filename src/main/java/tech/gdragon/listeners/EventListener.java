@@ -16,9 +16,8 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import tech.gdragon.DiscordBot;
 import tech.gdragon.commands.CommandHandler;
-import tech.gdragon.configuration.ServerSettings;
+import tech.gdragon.configuration.GuildSettings;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -38,7 +37,7 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(GuildJoinEvent e) {
-        DiscordBot.serverSettings.put(e.getGuild().getId(), new ServerSettings(e.getGuild()));
+        DiscordBot.serverSettings.put(e.getGuild().getId(), new GuildSettings(e.getGuild()));
         DiscordBot.writeSettingsJson();
         System.out.format("Joined new server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
     }
@@ -61,7 +60,7 @@ public class EventListener extends ListenerAdapter {
 
             int newSize = DiscordBot.voiceChannelSize(e.getChannelJoined());
             int botSize = DiscordBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
-            ServerSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
+            GuildSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
             int min = settings.autoJoinSettings.get(e.getChannelJoined().getId());
 
             if (newSize >= min && botSize < newSize) {  //check for tie with old server
@@ -112,7 +111,7 @@ public class EventListener extends ListenerAdapter {
 
             int newSize = DiscordBot.voiceChannelSize(e.getChannelJoined());
             int botSize = DiscordBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
-            ServerSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
+            GuildSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
             int min = settings.autoJoinSettings.get(e.getChannelJoined().getId());
 
             if (newSize >= min && botSize < newSize) {  //check for tie with old server
@@ -238,7 +237,7 @@ public class EventListener extends ListenerAdapter {
 //      FileReader fileReader = new FileReader("settings.json");
 //      BufferedReader buffered = new BufferedReader(fileReader);
 
-            Type type = new TypeToken<HashMap<String, ServerSettings>>() {
+            Type type = new TypeToken<HashMap<String, GuildSettings>>() {
             }.getType();
 
             DiscordBot.serverSettings = gson.fromJson("{}", type);
@@ -256,7 +255,7 @@ public class EventListener extends ListenerAdapter {
 
         for (Guild g : e.getJDA().getGuilds()) {    //validate settings files
             if (!DiscordBot.serverSettings.containsKey(g.getId())) {
-                DiscordBot.serverSettings.put(g.getId(), new ServerSettings(g));
+                DiscordBot.serverSettings.put(g.getId(), new GuildSettings(g));
                 DiscordBot.writeSettingsJson();
             }
         }

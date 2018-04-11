@@ -7,7 +7,6 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import tech.gdragon.commands.CommandHandler;
 import tech.gdragon.commands.audio.ClipCommand;
 import tech.gdragon.commands.audio.EchoCommand;
@@ -25,12 +24,11 @@ import tech.gdragon.commands.settings.PrefixCommand;
 import tech.gdragon.commands.settings.RemoveAliasCommand;
 import tech.gdragon.commands.settings.SaveLocationCommand;
 import tech.gdragon.commands.settings.VolumeCommand;
-import tech.gdragon.configuration.ServerSettings;
+import tech.gdragon.configuration.GuildSettings;
 import tech.gdragon.listeners.AudioReceiveListener;
 import tech.gdragon.listeners.AudioSendListener;
 import tech.gdragon.listeners.EventListener;
 
-import javax.security.auth.login.LoginException;
 import javax.sound.sampled.AudioFormat;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
@@ -46,8 +44,8 @@ import java.util.Random;
 import static java.lang.Thread.sleep;
 
 public class DiscordBot {
-    //contains the id of every guild that we are connected to and their corresponding ServerSettings object
-    public static HashMap<String, ServerSettings> serverSettings = new HashMap<>();
+    //contains the id of every guild that we are connected to and their corresponding GuildSettings object
+    public static HashMap<String, GuildSettings> serverSettings = new HashMap<>();
 
     public DiscordBot(String token) {
         try {
@@ -89,7 +87,6 @@ public class DiscordBot {
     }
 
 
-    public static final long PERMISSIONS = Permission.getRaw(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.VOICE_CONNECT, Permission.VOICE_USE_VAD, Permission.VOICE_SPEAK, Permission.MESSAGE_ATTACH_FILES);
 
     //UTILITY FUNCTIONS
 
@@ -101,7 +98,7 @@ public class DiscordBot {
         for (VoiceChannel v : vcs) {
             //does current interation beat old biggest?
             if (voiceChannelSize(v) > large) {
-                ServerSettings settings = serverSettings.get(v.getGuild().getId());
+                GuildSettings settings = serverSettings.get(v.getGuild().getId());
 
                 //we only want servers that beat the autojoin minimum (so we don't have to check later)
                 if (voiceChannelSize(v) >= settings.autoJoinSettings.get(v.getId())) {

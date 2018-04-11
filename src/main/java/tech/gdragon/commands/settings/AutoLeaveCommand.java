@@ -4,7 +4,7 @@ import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
 import tech.gdragon.commands.Command;
-import tech.gdragon.configuration.ServerSettings;
+import tech.gdragon.configuration.GuildSettings;
 
 
 public class AutoLeaveCommand implements Command {
@@ -36,7 +36,7 @@ public class AutoLeaveCommand implements Command {
             return;
         }
 
-        ServerSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
+        GuildSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
 
         if (args[0].toLowerCase().equals("all") && args.length == 2) {
 
