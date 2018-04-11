@@ -38,14 +38,14 @@ public class EventListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(GuildJoinEvent e) {
         DiscordBot.serverSettings.put(e.getGuild().getId(), new GuildSettings(e.getGuild()));
-        DiscordBot.writeSettingsJson();
+        GuildSettings.writeSettingsJson();
         System.out.format("Joined new server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
     }
 
     @Override
     public void onGuildLeave(GuildLeaveEvent e) {
         DiscordBot.serverSettings.remove(e.getGuild().getId());
-        DiscordBot.writeSettingsJson();
+        GuildSettings.writeSettingsJson();
         System.out.format("Left server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
     }
 
@@ -170,7 +170,7 @@ public class EventListener extends ListenerAdapter {
                     }
                 }
                 e.getChannel().sendMessage("Alerts now off, message `!alerts on` to re-enable at any time").queue();
-                DiscordBot.writeSettingsJson();
+                GuildSettings.writeSettingsJson();
 
             } else if (e.getMessage().getContent().endsWith("on")) {
                 for (Guild g : e.getJDA().getGuilds()) {
@@ -179,7 +179,7 @@ public class EventListener extends ListenerAdapter {
                     }
                 }
                 e.getChannel().sendMessage("Alerts now on, message `!alerts off` to disable at any time").queue();
-                DiscordBot.writeSettingsJson();
+                GuildSettings.writeSettingsJson();
             } else {
                 e.getChannel().sendMessage("!alerts [on | off]").queue();
             }
@@ -212,15 +212,16 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent e) {
+
         e.getJDA().getPresence().setGame(new Game() {
             @Override
             public String getName() {
-                return "!help | DicordEcho.com";
+                return "!help | maschmalow.net";
             }
 
             @Override
             public String getUrl() {
-                return "http://DicordEcho.com";
+                return "https://maschmalow.net";
             }
 
             @Override
@@ -228,64 +229,9 @@ public class EventListener extends ListenerAdapter {
                 return GameType.DEFAULT;
             }
         });
+        System.out.format("ONLINE: Connected to %s guilds!\n", e.getJDA().getGuilds().size());
 
-        try {
-            System.out.format("ONLINE: Connected to %s guilds!\n", e.getJDA().getGuilds().size());
+        GuildSettings.readSettings();
 
-            Gson gson = new Gson();
-
-//      FileReader fileReader = new FileReader("settings.json");
-//      BufferedReader buffered = new BufferedReader(fileReader);
-
-            Type type = new TypeToken<HashMap<String, GuildSettings>>() {
-            }.getType();
-
-            DiscordBot.serverSettings = gson.fromJson("{}", type);
-
-            if (DiscordBot.serverSettings == null)
-                DiscordBot.serverSettings = new HashMap<>();
-
-//      buffered.close();
-//      fileReader.close();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-
-        for (Guild g : e.getJDA().getGuilds()) {    //validate settings files
-            if (!DiscordBot.serverSettings.containsKey(g.getId())) {
-                DiscordBot.serverSettings.put(g.getId(), new GuildSettings(g));
-                DiscordBot.writeSettingsJson();
-            }
-        }
-
-        try {
-            Path dir = Paths.get("/var/www/html/");
-            if (Files.notExists(dir))
-                dir = Files.createDirectories(Paths.get("recordings/"));
-
-            Files
-                    .list(dir)
-                    .filter(path -> Files.isRegularFile(path) && path.toString().toLowerCase().endsWith(".mp3"))
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                            logger.info("Deleting file " + path + "...");
-                        } catch (IOException e1) {
-                            logger.error("Could not delete: " + path, e1);
-                        }
-                    });
-        } catch (IOException e1) {
-            logger.error("Error preparing to read recordings", e1);
-        }
-
-        //check for servers to join
-        for (Guild g : e.getJDA().getGuilds()) {
-            VoiceChannel biggest = DiscordBot.biggestChannel(g.getVoiceChannels());
-            if (biggest != null) {
-                DiscordBot.joinVoiceChannel(DiscordBot.biggestChannel(g.getVoiceChannels()), false);
-            }
-        }
     }
 }

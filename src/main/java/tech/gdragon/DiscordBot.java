@@ -46,22 +46,22 @@ import static java.lang.Thread.sleep;
 public class DiscordBot {
     //contains the id of every guild that we are connected to and their corresponding GuildSettings object
     public static HashMap<String, GuildSettings> serverSettings = new HashMap<>();
+    public static JDA jda;
+
+
+
 
     public DiscordBot(String token) {
-        try {
             //read the bot's token from a file name "token" in the main directory
 //      FileReader fr = new FileReader("shark_token");
 //      BufferedReader br = new BufferedReader(fr);
 //      String token = br.readLine();
 
             //create bot instance
-            new JDABuilder(AccountType.BOT)
+            DiscordBot.jda = new JDABuilder(AccountType.BOT)
                     .setToken(token)
                     .addEventListener(new EventListener())
                     .buildBlocking();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         //register commands and their aliases
         CommandHandler.commands.put("help", new HelpCommand());
@@ -209,20 +209,7 @@ public class DiscordBot {
         }
     }
 
-    //write the current state of all server settings to the settings.json file
-    public static void writeSettingsJson() {
-        try {
-            Gson gson = new Gson();
-            String json = gson.toJson(DiscordBot.serverSettings);
 
-            FileWriter fw = new FileWriter("settings.json");
-            fw.write(json);
-            fw.flush();
-            fw.close();
-
-        } catch (Exception ex) {
-        }
-    }
 
     //sends alert DM to anyone in the given voicechannel who isn't on the blacklist
     public static void alert(VoiceChannel vc) {
