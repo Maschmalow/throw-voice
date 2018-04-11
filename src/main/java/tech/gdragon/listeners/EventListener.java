@@ -34,156 +34,156 @@ import static java.lang.Thread.sleep;
 
 public class EventListener extends ListenerAdapter {
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  @Override
-  public void onGuildJoin(GuildJoinEvent e) {
-    DiscordBot.serverSettings.put(e.getGuild().getId(), new ServerSettings(e.getGuild()));
-    DiscordBot.writeSettingsJson();
-    System.out.format("Joined new server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
-  }
-
-  @Override
-  public void onGuildLeave(GuildLeaveEvent e) {
-    DiscordBot.serverSettings.remove(e.getGuild().getId());
-    DiscordBot.writeSettingsJson();
-    System.out.format("Left server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
-  }
-
-  @Override
-  public void onGuildVoiceJoin(GuildVoiceJoinEvent e) {
-    if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
-      return;
-
-    VoiceChannel biggestChannel = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
-
-    if (e.getGuild().getAudioManager().isConnected()) {
-
-      int newSize = DiscordBot.voiceChannelSize(e.getChannelJoined());
-      int botSize = DiscordBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
-      ServerSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
-      int min = settings.autoJoinSettings.get(e.getChannelJoined().getId());
-
-      if (newSize >= min && botSize < newSize) {  //check for tie with old server
-        if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
-          DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-        DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
-      }
-
-    } else {
-      if (biggestChannel != null) {
-        DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
-      }
-    }
-  }
-
-  @Override
-  public void onGuildVoiceLeave(GuildVoiceLeaveEvent e) {
-    if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
-      return;
-
-    int min = DiscordBot.serverSettings.get(e.getGuild().getId()).autoLeaveSettings.get(e.getChannelLeft().getId());
-    int size = DiscordBot.voiceChannelSize(e.getChannelLeft());
-
-    if (size <= min && e.getGuild().getAudioManager().getConnectedChannel() == e.getChannelLeft()) {
-
-      if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
-        DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-      DiscordBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
-
-      VoiceChannel biggest = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
-      if (biggest != null) {
-        DiscordBot.joinVoiceChannel(biggest, false);
-      }
-    }
-  }
-
-  @Override
-  public void onGuildVoiceMove(GuildVoiceMoveEvent e) {
-    if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
-      return;
-
-    //Check if bot needs to join newly joined channel
-    VoiceChannel biggestChannel = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
-
-    if (e.getGuild().getAudioManager().isConnected()) {
-
-      int newSize = DiscordBot.voiceChannelSize(e.getChannelJoined());
-      int botSize = DiscordBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
-      ServerSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
-      int min = settings.autoJoinSettings.get(e.getChannelJoined().getId());
-
-      if (newSize >= min && botSize < newSize) {  //check for tie with old server
-        if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
-          DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-        DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
-      }
-
-    } else {
-      if (biggestChannel != null) {
-        DiscordBot.joinVoiceChannel(biggestChannel, false);
-      }
-    }
-
-    //Check if bot needs to leave old channel
-    int min = DiscordBot.serverSettings.get(e.getGuild().getId()).autoLeaveSettings.get(e.getChannelLeft().getId());
-    int size = DiscordBot.voiceChannelSize(e.getChannelLeft());
-
-    if (size <= min && e.getGuild().getAudioManager().getConnectedChannel() == e.getChannelLeft()) {
-
-      if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
-        DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-      DiscordBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
-
-      VoiceChannel biggest = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
-      if (biggest != null) {
-        DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
-      }
-    }
-  }
-
-  @Override
-  public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
-    if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
-      return;
-
-    String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
-    //force help to always work with "!" prefix
-    if (e.getMessage().getContent().startsWith(prefix) || e.getMessage().getContent().startsWith("!help")) {
-      CommandHandler.handleCommand(CommandHandler.parser.parse(e.getMessage().getContent().toLowerCase(), e));
-    }
-  }
-
-  @Override
-  public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
-    if (e.getAuthor() == null || e.getAuthor().isBot())
-      return;
-
-    if (e.getMessage().getContent().startsWith("!alerts")) {
-      if (e.getMessage().getContent().endsWith("off")) {
-        for (Guild g : e.getJDA().getGuilds()) {
-          if (g.getMember(e.getAuthor()) != null) {
-            DiscordBot.serverSettings.get(g.getId()).alertBlackList.add(e.getAuthor().getId());
-          }
-        }
-        e.getChannel().sendMessage("Alerts now off, message `!alerts on` to re-enable at any time").queue();
+    @Override
+    public void onGuildJoin(GuildJoinEvent e) {
+        DiscordBot.serverSettings.put(e.getGuild().getId(), new ServerSettings(e.getGuild()));
         DiscordBot.writeSettingsJson();
+        System.out.format("Joined new server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
+    }
 
-      } else if (e.getMessage().getContent().endsWith("on")) {
-        for (Guild g : e.getJDA().getGuilds()) {
-          if (g.getMember(e.getAuthor()) != null) {
-            DiscordBot.serverSettings.get(g.getId()).alertBlackList.remove(e.getAuthor().getId());
-          }
-        }
-        e.getChannel().sendMessage("Alerts now on, message `!alerts off` to disable at any time").queue();
+    @Override
+    public void onGuildLeave(GuildLeaveEvent e) {
+        DiscordBot.serverSettings.remove(e.getGuild().getId());
         DiscordBot.writeSettingsJson();
-      } else {
-        e.getChannel().sendMessage("!alerts [on | off]").queue();
-      }
+        System.out.format("Left server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
+    }
+
+    @Override
+    public void onGuildVoiceJoin(GuildVoiceJoinEvent e) {
+        if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
+            return;
+
+        VoiceChannel biggestChannel = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
+
+        if (e.getGuild().getAudioManager().isConnected()) {
+
+            int newSize = DiscordBot.voiceChannelSize(e.getChannelJoined());
+            int botSize = DiscordBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
+            ServerSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
+            int min = settings.autoJoinSettings.get(e.getChannelJoined().getId());
+
+            if (newSize >= min && botSize < newSize) {  //check for tie with old server
+                if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
+                    DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
+
+                DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
+            }
+
+        } else {
+            if (biggestChannel != null) {
+                DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
+            }
+        }
+    }
+
+    @Override
+    public void onGuildVoiceLeave(GuildVoiceLeaveEvent e) {
+        if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
+            return;
+
+        int min = DiscordBot.serverSettings.get(e.getGuild().getId()).autoLeaveSettings.get(e.getChannelLeft().getId());
+        int size = DiscordBot.voiceChannelSize(e.getChannelLeft());
+
+        if (size <= min && e.getGuild().getAudioManager().getConnectedChannel() == e.getChannelLeft()) {
+
+            if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
+                DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
+
+            DiscordBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
+
+            VoiceChannel biggest = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
+            if (biggest != null) {
+                DiscordBot.joinVoiceChannel(biggest, false);
+            }
+        }
+    }
+
+    @Override
+    public void onGuildVoiceMove(GuildVoiceMoveEvent e) {
+        if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
+            return;
+
+        //Check if bot needs to join newly joined channel
+        VoiceChannel biggestChannel = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
+
+        if (e.getGuild().getAudioManager().isConnected()) {
+
+            int newSize = DiscordBot.voiceChannelSize(e.getChannelJoined());
+            int botSize = DiscordBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
+            ServerSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
+            int min = settings.autoJoinSettings.get(e.getChannelJoined().getId());
+
+            if (newSize >= min && botSize < newSize) {  //check for tie with old server
+                if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
+                    DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
+
+                DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
+            }
+
+        } else {
+            if (biggestChannel != null) {
+                DiscordBot.joinVoiceChannel(biggestChannel, false);
+            }
+        }
+
+        //Check if bot needs to leave old channel
+        int min = DiscordBot.serverSettings.get(e.getGuild().getId()).autoLeaveSettings.get(e.getChannelLeft().getId());
+        int size = DiscordBot.voiceChannelSize(e.getChannelLeft());
+
+        if (size <= min && e.getGuild().getAudioManager().getConnectedChannel() == e.getChannelLeft()) {
+
+            if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
+                DiscordBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
+
+            DiscordBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
+
+            VoiceChannel biggest = DiscordBot.biggestChannel(e.getGuild().getVoiceChannels());
+            if (biggest != null) {
+                DiscordBot.joinVoiceChannel(e.getChannelJoined(), false);
+            }
+        }
+    }
+
+    @Override
+    public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
+        if (e.getMember() == null || e.getMember().getUser() == null || e.getMember().getUser().isBot())
+            return;
+
+        String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+        //force help to always work with "!" prefix
+        if (e.getMessage().getContent().startsWith(prefix) || e.getMessage().getContent().startsWith("!help")) {
+            CommandHandler.handleCommand(CommandHandler.parser.parse(e.getMessage().getContent().toLowerCase(), e));
+        }
+    }
+
+    @Override
+    public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
+        if (e.getAuthor() == null || e.getAuthor().isBot())
+            return;
+
+        if (e.getMessage().getContent().startsWith("!alerts")) {
+            if (e.getMessage().getContent().endsWith("off")) {
+                for (Guild g : e.getJDA().getGuilds()) {
+                    if (g.getMember(e.getAuthor()) != null) {
+                        DiscordBot.serverSettings.get(g.getId()).alertBlackList.add(e.getAuthor().getId());
+                    }
+                }
+                e.getChannel().sendMessage("Alerts now off, message `!alerts on` to re-enable at any time").queue();
+                DiscordBot.writeSettingsJson();
+
+            } else if (e.getMessage().getContent().endsWith("on")) {
+                for (Guild g : e.getJDA().getGuilds()) {
+                    if (g.getMember(e.getAuthor()) != null) {
+                        DiscordBot.serverSettings.get(g.getId()).alertBlackList.remove(e.getAuthor().getId());
+                    }
+                }
+                e.getChannel().sendMessage("Alerts now on, message `!alerts off` to disable at any time").queue();
+                DiscordBot.writeSettingsJson();
+            } else {
+                e.getChannel().sendMessage("!alerts [on | off]").queue();
+            }
 
         /* removed because prefix and aliases are dependent on guild, which cannot be assumed without a message sent from guild
         } else if (e.getMessage().getContent().startsWith("!help")) {
@@ -206,87 +206,87 @@ public class EventListener extends ListenerAdapter {
 
             e.getChannel().sendMessage(embed.build()).queue();
         */
-    } else {
-      e.getChannel().sendMessage("DM commands unsupported, send `!help` in your guild chat for more info.").queue();
+        } else {
+            e.getChannel().sendMessage("DM commands unsupported, send `!help` in your guild chat for more info.").queue();
+        }
     }
-  }
 
-  @Override
-  public void onReady(ReadyEvent e) {
-    e.getJDA().getPresence().setGame(new Game() {
-      @Override
-      public String getName() {
-        return "!help | DicordEcho.com";
-      }
+    @Override
+    public void onReady(ReadyEvent e) {
+        e.getJDA().getPresence().setGame(new Game() {
+            @Override
+            public String getName() {
+                return "!help | DicordEcho.com";
+            }
 
-      @Override
-      public String getUrl() {
-        return "http://DicordEcho.com";
-      }
+            @Override
+            public String getUrl() {
+                return "http://DicordEcho.com";
+            }
 
-      @Override
-      public GameType getType() {
-        return GameType.DEFAULT;
-      }
-    });
+            @Override
+            public GameType getType() {
+                return GameType.DEFAULT;
+            }
+        });
 
-    try {
-      System.out.format("ONLINE: Connected to %s guilds!\n", e.getJDA().getGuilds().size(), e.getJDA().getVoiceChannels().size());
+        try {
+            System.out.format("ONLINE: Connected to %s guilds!\n", e.getJDA().getGuilds().size());
 
-      Gson gson = new Gson();
+            Gson gson = new Gson();
 
 //      FileReader fileReader = new FileReader("settings.json");
 //      BufferedReader buffered = new BufferedReader(fileReader);
 
-      Type type = new TypeToken<HashMap<String, ServerSettings>>() {
-      }.getType();
+            Type type = new TypeToken<HashMap<String, ServerSettings>>() {
+            }.getType();
 
-      DiscordBot.serverSettings = gson.fromJson("{}", type);
+            DiscordBot.serverSettings = gson.fromJson("{}", type);
 
-      if (DiscordBot.serverSettings == null)
-        DiscordBot.serverSettings = new HashMap<>();
+            if (DiscordBot.serverSettings == null)
+                DiscordBot.serverSettings = new HashMap<>();
 
 //      buffered.close();
 //      fileReader.close();
 
-    } catch (Exception ex) {
-      ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+
+        for (Guild g : e.getJDA().getGuilds()) {    //validate settings files
+            if (!DiscordBot.serverSettings.containsKey(g.getId())) {
+                DiscordBot.serverSettings.put(g.getId(), new ServerSettings(g));
+                DiscordBot.writeSettingsJson();
+            }
+        }
+
+        try {
+            Path dir = Paths.get("/var/www/html/");
+            if (Files.notExists(dir))
+                dir = Files.createDirectories(Paths.get("recordings/"));
+
+            Files
+                    .list(dir)
+                    .filter(path -> Files.isRegularFile(path) && path.toString().toLowerCase().endsWith(".mp3"))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                            logger.info("Deleting file " + path + "...");
+                        } catch (IOException e1) {
+                            logger.error("Could not delete: " + path, e1);
+                        }
+                    });
+        } catch (IOException e1) {
+            logger.error("Error preparing to read recordings", e1);
+        }
+
+        //check for servers to join
+        for (Guild g : e.getJDA().getGuilds()) {
+            VoiceChannel biggest = DiscordBot.biggestChannel(g.getVoiceChannels());
+            if (biggest != null) {
+                DiscordBot.joinVoiceChannel(DiscordBot.biggestChannel(g.getVoiceChannels()), false);
+            }
+        }
     }
-
-
-    for (Guild g : e.getJDA().getGuilds()) {    //validate settings files
-      if (!DiscordBot.serverSettings.containsKey(g.getId())) {
-        DiscordBot.serverSettings.put(g.getId(), new ServerSettings(g));
-        DiscordBot.writeSettingsJson();
-      }
-    }
-
-    try {
-      Path dir = Paths.get("/var/www/html/");
-      if (Files.notExists(dir))
-        dir = Files.createDirectories(Paths.get("recordings/"));
-
-      Files
-        .list(dir)
-        .filter(path -> Files.isRegularFile(path) && path.toString().toLowerCase().endsWith(".mp3"))
-        .forEach(path -> {
-          try {
-            Files.delete(path);
-            logger.info("Deleting file " + path + "...");
-          } catch (IOException e1) {
-            logger.error("Could not delete: " + path, e1);
-          }
-        });
-    } catch (IOException e1) {
-      logger.error("Error preparing to read recordings", e1);
-    }
-
-    //check for servers to join
-    for (Guild g : e.getJDA().getGuilds()) {
-      VoiceChannel biggest = DiscordBot.biggestChannel(g.getVoiceChannels());
-      if (biggest != null) {
-        DiscordBot.joinVoiceChannel(DiscordBot.biggestChannel(g.getVoiceChannels()), false);
-      }
-    }
-  }
 }

@@ -14,74 +14,74 @@ import java.util.Map;
 
 public class HelpCommand implements Command {
 
-  @Override
-  public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-    return true;
-  }
-
-  @Override
-  public void action(String[] args, GuildMessageReceivedEvent e) {
-    if (args.length != 0) {
-      String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
-      DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-      return;
+    @Override
+    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
+        return true;
     }
 
-    EmbedBuilder embed = new EmbedBuilder();
-    embed.setAuthor("Throw Voice", "https://github.com/guacamoledragon/throw-voice", e.getJDA().getSelfUser().getAvatarUrl());
-    embed.setColor(Color.RED);
-    embed.setTitle("Currently in beta, being actively developed and tested. Expect bugs.");
-    embed.setDescription("Throw Voice was created from Discord Echo, join their guild for updates - https://discord.gg/JWNFSZJ");
-    embed.setThumbnail("http://www.freeiconspng.com/uploads/information-icon-5.png");
-    embed.setFooter("Replace brackets [] with item specified. Vertical bar | means 'or', either side of bar is valid choice.", null);
-    embed.addBlankField(false);
+    @Override
+    public void action(String[] args, GuildMessageReceivedEvent e) {
+        if (args.length != 0) {
+            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
+            return;
+        }
 
-    Object[] cmds = CommandHandler.commands.keySet().toArray();
-    Arrays.sort(cmds);
-    for (Object command : cmds) {
-      if (command == "help") continue;
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setAuthor("Throw Voice", "https://github.com/guacamoledragon/throw-voice", e.getJDA().getSelfUser().getAvatarUrl());
+        embed.setColor(Color.RED);
+        embed.setTitle("Currently in beta, being actively developed and tested. Expect bugs.");
+        embed.setDescription("Throw Voice was created from Discord Echo, join their guild for updates - https://discord.gg/JWNFSZJ");
+        embed.setThumbnail("http://www.freeiconspng.com/uploads/information-icon-5.png");
+        embed.setFooter("Replace brackets [] with item specified. Vertical bar | means 'or', either side of bar is valid choice.", null);
+        embed.addBlankField(false);
 
-      Command cmd = CommandHandler.commands.get(command);
-      String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+        Object[] cmds = CommandHandler.commands.keySet().toArray();
+        Arrays.sort(cmds);
+        for (Object command : cmds) {
+            if (command == "help") continue;
 
-      ArrayList<String> aliases = new ArrayList<>();
-      for (Map.Entry<String, String> entry : DiscordBot.serverSettings.get(e.getGuild().getId()).aliases.entrySet()) {
-        if (entry.getValue().equals(command))
-          aliases.add(entry.getKey());
-      }
+            Command cmd = CommandHandler.commands.get(command);
+            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
 
-      if (aliases.size() == 0)
-        embed.addField(cmd.usage(prefix), cmd.descripition(), true);
-      else {
-        String descripition = "";
-        descripition += "Aliases: ";
-        for (String alias : aliases)
-          descripition += "`" + alias + "`, ";
+            ArrayList<String> aliases = new ArrayList<>();
+            for (Map.Entry<String, String> entry : DiscordBot.serverSettings.get(e.getGuild().getId()).aliases.entrySet()) {
+                if (entry.getValue().equals(command))
+                    aliases.add(entry.getKey());
+            }
 
-        //remove extra comma
-        descripition = descripition.substring(0, descripition.lastIndexOf(','));
-        descripition += ". " + cmd.descripition();
-        embed.addField(cmd.usage(prefix), descripition, true);
-      }
+            if (aliases.size() == 0)
+                embed.addField(cmd.usage(prefix), cmd.descripition(), true);
+            else {
+                String descripition = "";
+                descripition += "Aliases: ";
+                for (String alias : aliases)
+                    descripition += "`" + alias + "`, ";
+
+                //remove extra comma
+                descripition = descripition.substring(0, descripition.lastIndexOf(','));
+                descripition += ". " + cmd.descripition();
+                embed.addField(cmd.usage(prefix), descripition, true);
+            }
+        }
+
+        DiscordBot.sendMessage(e.getChannel(), "Check your DM's!");
+
+        e.getAuthor().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(embed.build()).queue());
     }
 
-    DiscordBot.sendMessage(e.getChannel(), "Check your DM's!");
+    @Override
+    public String usage(String prefix) {
+        return prefix + "help";
+    }
 
-    e.getAuthor().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(embed.build()).queue());
-  }
+    @Override
+    public String descripition() {
+        return "Shows all commands and their usages";
+    }
 
-  @Override
-  public String usage(String prefix) {
-    return prefix + "help";
-  }
+    @Override
+    public void executed(boolean success, GuildMessageReceivedEvent e) {
 
-  @Override
-  public String descripition() {
-    return "Shows all commands and their usages";
-  }
-
-  @Override
-  public void executed(boolean success, GuildMessageReceivedEvent e) {
-    return;
-  }
+    }
 }

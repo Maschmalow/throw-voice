@@ -7,37 +7,37 @@ import tech.gdragon.commands.Command;
 
 public class PrefixCommand implements Command {
 
-  @Override
-  public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-    return true;
-  }
-
-  @Override
-  public void action(String[] args, GuildMessageReceivedEvent e) {
-    if (args[0].length() != 1 || args.length != 1) {
-      String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
-      DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-      return;
+    @Override
+    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
+        return true;
     }
 
-    DiscordBot.serverSettings.get(e.getGuild().getId()).prefix = args[0];
-    DiscordBot.writeSettingsJson();
+    @Override
+    public void action(String[] args, GuildMessageReceivedEvent e) {
+        if (args[0].length() != 1 || args.length != 1) {
+            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
+            return;
+        }
 
-    DiscordBot.sendMessage(e.getChannel(), "Command prefix now set to " + args[0]);
-  }
+        DiscordBot.serverSettings.get(e.getGuild().getId()).prefix = args[0];
+        DiscordBot.writeSettingsJson();
 
-  @Override
-  public String usage(String prefix) {
-    return prefix + "prefix [character]";
-  }
+        DiscordBot.sendMessage(e.getChannel(), "Command prefix now set to " + args[0]);
+    }
 
-  @Override
-  public String descripition() {
-    return "Sets the prefix for each command to avoid conflict with other bots (Default is '!')";
-  }
+    @Override
+    public String usage(String prefix) {
+        return prefix + "prefix [character]";
+    }
 
-  @Override
-  public void executed(boolean success, GuildMessageReceivedEvent e) {
-    return;
-  }
+    @Override
+    public String descripition() {
+        return "Sets the prefix for each command to avoid conflict with other bots (Default is '!')";
+    }
+
+    @Override
+    public void executed(boolean success, GuildMessageReceivedEvent e) {
+
+    }
 }

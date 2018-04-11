@@ -7,54 +7,51 @@ import tech.gdragon.commands.Command;
 
 public class VolumeCommand implements Command {
 
-  @Override
-  public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-    return true;
-  }
-
-  @Override
-  public void action(String[] args, GuildMessageReceivedEvent e) {
-    if (args.length != 1) {
-      String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
-      DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-      return;
+    @Override
+    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
+        return true;
     }
 
-    try {
-      int num = Integer.parseInt(args[0]);
+    @Override
+    public void action(String[] args, GuildMessageReceivedEvent e) {
+        if (args.length != 1) {
+            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
+            return;
+        }
 
-      if (num > 0 && num <= 100) {
-        double percent = (double) num / 100.0;
-        DiscordBot.serverSettings.get(e.getGuild().getId()).volume = percent;
-        DiscordBot.writeSettingsJson();
+        try {
+            int num = Integer.parseInt(args[0]);
 
-        DiscordBot.sendMessage(e.getChannel(), "Volume set to " + num + "% for next recording!");
+            if (num > 0 && num <= 100) {
+                DiscordBot.serverSettings.get(e.getGuild().getId()).volume = (double) num / 100.0;
+                DiscordBot.writeSettingsJson();
 
-      } else {
-        String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
-        DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-        return;
-      }
+                DiscordBot.sendMessage(e.getChannel(), "Volume set to " + num + "% for next recording!");
 
-    } catch (Exception ex) {
-      String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
-      DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-      return;
+            } else {
+                String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+                DiscordBot.sendMessage(e.getChannel(), usage(prefix));
+            }
+
+        } catch (Exception ex) {
+            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
+        }
     }
-  }
 
-  @Override
-  public String usage(String prefix) {
-    return prefix + "volume [1-100]";
-  }
+    @Override
+    public String usage(String prefix) {
+        return prefix + "volume [1-100]";
+    }
 
-  @Override
-  public String descripition() {
-    return "Sets the percentage volume to record at, from 1-100%";
-  }
+    @Override
+    public String descripition() {
+        return "Sets the percentage volume to record at, from 1-100%";
+    }
 
-  @Override
-  public void executed(boolean success, GuildMessageReceivedEvent e) {
-    return;
-  }
+    @Override
+    public void executed(boolean success, GuildMessageReceivedEvent e) {
+
+    }
 }

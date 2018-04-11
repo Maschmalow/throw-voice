@@ -7,49 +7,49 @@ import tech.gdragon.commands.Command;
 
 public class JoinCommand implements Command {
 
-  @Override
-  public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-    return true;
-  }
-
-  @Override
-  public void action(String[] args, GuildMessageReceivedEvent e) {
-    if (args.length != 0) {
-
-
-      return;
+    @Override
+    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
+        return true;
     }
 
-    if (e.getGuild().getAudioManager().getConnectedChannel() != null &&
-      e.getGuild().getAudioManager().getConnectedChannel().getMembers().contains(e.getMember())) {
-      DiscordBot.sendMessage(e.getChannel(), "I am already in your channel!");
-      return;
+    @Override
+    public void action(String[] args, GuildMessageReceivedEvent e) {
+        if (args.length != 0) {
+
+
+            return;
+        }
+
+        if (e.getGuild().getAudioManager().getConnectedChannel() != null &&
+                e.getGuild().getAudioManager().getConnectedChannel().getMembers().contains(e.getMember())) {
+            DiscordBot.sendMessage(e.getChannel(), "I am already in your channel!");
+            return;
+        }
+
+        if (e.getMember().getVoiceState().getChannel() == null) {
+            DiscordBot.sendMessage(e.getChannel(), "You need to be in a voice channel to use this command!");
+            return;
+        }
+
+        //write out previous channel's audio if autoSave is on
+        if (e.getGuild().getAudioManager().isConnected() && DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
+            DiscordBot.writeToFile(e.getGuild());
+
+        DiscordBot.joinVoiceChannel(e.getMember().getVoiceState().getChannel(), true);
     }
 
-    if (e.getMember().getVoiceState().getChannel() == null) {
-      DiscordBot.sendMessage(e.getChannel(), "You need to be in a voice channel to use this command!");
-      return;
+    @Override
+    public String usage(String prefix) {
+        return prefix + "join";
     }
 
-    //write out previous channel's audio if autoSave is on
-    if (e.getGuild().getAudioManager().isConnected() && DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
-      DiscordBot.writeToFile(e.getGuild());
+    @Override
+    public String descripition() {
+        return "Force the bot to join and record your current channel";
+    }
 
-    DiscordBot.joinVoiceChannel(e.getMember().getVoiceState().getChannel(), true);
-  }
+    @Override
+    public void executed(boolean success, GuildMessageReceivedEvent e) {
 
-  @Override
-  public String usage(String prefix) {
-    return prefix + "join";
-  }
-
-  @Override
-  public String descripition() {
-    return "Force the bot to join and record your current channel";
-  }
-
-  @Override
-  public void executed(boolean success, GuildMessageReceivedEvent e) {
-    return;
-  }
+    }
 }
