@@ -2,32 +2,31 @@ package tech.gdragon.commands;
 
 import tech.gdragon.DiscordBot;
 import tech.gdragon.configuration.GuildSettings;
+import tech.gdragon.configuration.ServerSettings;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class CommandHandler {
     public static final CommandParser parser = new CommandParser();
-    public static HashMap<String, Command> commands = new HashMap<>();
+    public static Map<String, Command> commands = new HashMap<>();
 
     public static void handleCommand(CommandParser.CommandContainer cmd) {
-        GuildSettings settings = DiscordBot.settings.get(cmd.e.getGuild().getId());
+        GuildSettings settings = ServerSettings.get(cmd.e.getGuild());
 
-        if (commands.containsKey(cmd.invoke.toLowerCase()) || settings.aliases.containsKey(cmd.invoke.toLowerCase())) {
-
-            String invoke;
-            if (settings.aliases.containsKey(cmd.invoke.toLowerCase())) {
-                invoke = settings.aliases.get(cmd.invoke);
-            } else {
-                invoke = cmd.invoke;
-            }
-
-            Boolean safe = commands.get(invoke).called(cmd.args, cmd.e);
-
-            if (safe)
-                commands.get(invoke).action(cmd.args, cmd.e);
+        Command command = commands.get(cmd.invoke);
+        if (command == null)
+            command = commands.get(settings.aliases.get(cmd.invoke));
+        if (command == null)
+            return;
 
 
-            commands.get(invoke).executed(safe, cmd.e);
-        }
+        Boolean safe = command.called(cmd.args, cmd.e);
+
+        if (safe)
+            command.action(cmd.args, cmd.e);
+
+        command.executed(safe, cmd.e);
     }
 }
+

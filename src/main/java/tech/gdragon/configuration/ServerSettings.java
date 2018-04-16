@@ -39,6 +39,14 @@ public class ServerSettings {
                 update = true;
             }
         }
+
+        for(String guildId : instance.guildsSettings.keySet()) {
+            if(DiscordBot.jda.getGuildById(guildId) == null) {
+                instance.guildsSettings.remove(guildId);
+                update = true;
+            }
+        }
+
         if (update)
             ServerSettings.write();
     }

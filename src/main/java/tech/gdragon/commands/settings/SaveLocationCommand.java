@@ -3,6 +3,7 @@ package tech.gdragon.commands.settings;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
 import tech.gdragon.commands.Command;
+import tech.gdragon.configuration.ServerSettings;
 
 
 public class SaveLocationCommand implements Command {
@@ -15,7 +16,7 @@ public class SaveLocationCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length > 1) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
+            String prefix = ServerSettings.get(e.getGuild()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
@@ -38,9 +39,10 @@ public class SaveLocationCommand implements Command {
                 return;
             }
             String id = e.getGuild().getTextChannelsByName(args[0], true).get(0).getId();
-            DiscordBot.settings.get(e.getGuild().getId()).defaultTextChannel = id;
+
+            ServerSettings.get(e.getGuild()).defaultTextChannel = id;
             DiscordBot.sendMessage(e.getChannel(), "Now defaulting to the " + e.getGuild().getTextChannelById(id).getName() + " text channel");
-            DiscordBot.writeSettingsJson();
+            ServerSettings.write();
 
         }
     }

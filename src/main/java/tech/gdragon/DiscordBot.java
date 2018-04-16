@@ -6,6 +6,7 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import tech.gdragon.commands.CommandHandler;
 import tech.gdragon.commands.audio.ClipCommand;
 import tech.gdragon.commands.audio.EchoCommand;
@@ -29,6 +30,7 @@ import tech.gdragon.listeners.AudioReceiveListener;
 import tech.gdragon.listeners.AudioSendListener;
 import tech.gdragon.listeners.EventListener;
 
+import javax.security.auth.login.LoginException;
 import javax.sound.sampled.AudioFormat;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
@@ -48,19 +50,20 @@ public class DiscordBot {
     public static JDA jda;
 
 
+    public DiscordBot() {
+
+        ServerSettings.read();
+        ServerSettings.updateGuilds(); //in case we were kicked while offline
 
 
-    public DiscordBot(String token) {
-            //read the bot's token from a file name "token" in the main directory
-//      FileReader fr = new FileReader("shark_token");
-//      BufferedReader br = new BufferedReader(fr);
-//      String token = br.readLine();
-
-            //create bot instance
+        try {
             DiscordBot.jda = new JDABuilder(AccountType.BOT)
-                    .setToken(token)
+                    .setToken(ServerSettings.getBotToken())
                     .addEventListener(new EventListener())
                     .buildBlocking();
+        } catch (LoginException | InterruptedException | RateLimitedException e) {
+            throw new RuntimeException("Could not login", e);
+        }
 
         //register commands and their aliases
         CommandHandler.commands.put("help", new HelpCommand());
@@ -86,7 +89,6 @@ public class DiscordBot {
     }
 
 
-
     //UTILITY FUNCTIONS
 
     //find the biggest voice channel that surpases the server's autojoin minimum
@@ -97,7 +99,7 @@ public class DiscordBot {
         for (VoiceChannel v : vcs) {
             //does current interation beat old biggest?
             if (voiceChannelSize(v) > large) {
-                GuildSettings settings = DiscordBot.settings.get(v.getGuild().getId());
+                GuildSettings settings = ServerSettings.get(v.getGuild());
 
                 //we only want servers that beat the autojoin minimum (so we don't have to check later)
                 if (voiceChannelSize(v) >= settings.autoJoinSettings.get(v.getId())) {
@@ -134,7 +136,7 @@ public class DiscordBot {
 
     public static void writeToFile(Guild guild, int time, TextChannel tc) {
         if (tc == null) {
-            tc = guild.getTextChannelById(settings.get(guild.getId()).defaultTextChannel);
+            tc = guild.getTextChannelById(ServerSettings.get(guild).defaultTextChannel);
         }
 
         AudioReceiveListener ah = (AudioReceiveListener) guild.getAudioManager().getReceiveHandler();
@@ -172,7 +174,7 @@ public class DiscordBot {
             if (dest.length() / 1024 / 1024 < 8) {
                 final TextChannel channel = tc;
                 tc.sendFile(dest, null).queue(null, (Throwable) -> {
-                    sendMessage(guild.getTextChannelById(settings.get(guild.getId()).defaultTextChannel),
+                    sendMessage(guild.getTextChannelById(ServerSettings.get(guild).defaultTextChannel),
                             "I don't have permissions to send files in " + channel.getName() + "!");
                 });
 
@@ -207,7 +209,6 @@ public class DiscordBot {
             sendMessage(tc, "Unknown error sending file");
         }
     }
-
 
 
     //sends alert DM to anyone in the given voicechannel who isn't on the blacklist

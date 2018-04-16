@@ -4,6 +4,7 @@ package tech.gdragon;
 import fi.iki.elonen.NanoHTTPD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.gdragon.configuration.ServerSettings;
 
 import java.io.IOException;
 
@@ -17,7 +18,7 @@ public final class App {
    */
   public static void main(String[] args) {
 
-    new DiscordBot(token);
+    new DiscordBot();
 
   }
 }
