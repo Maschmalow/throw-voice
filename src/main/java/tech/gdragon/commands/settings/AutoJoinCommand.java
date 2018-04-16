@@ -17,7 +17,7 @@ public class AutoJoinCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length < 2) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
@@ -29,7 +29,7 @@ public class AutoJoinCommand implements Command {
             if (num == 0) {
                 num = Integer.MAX_VALUE;
             } else if (num < 0) {
-                String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+                String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
                 DiscordBot.sendMessage(e.getChannel(), "Number must be positive!");
                 return;
             }
@@ -37,7 +37,7 @@ public class AutoJoinCommand implements Command {
         } catch (Exception ex) {
 
             if (!args[args.length - 1].equals("off")) {
-                String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+                String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
                 DiscordBot.sendMessage(e.getChannel(), usage(prefix));
                 return;
 
@@ -46,7 +46,7 @@ public class AutoJoinCommand implements Command {
             }
         }
 
-        GuildSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
+        GuildSettings settings = DiscordBot.settings.get(e.getGuild().getId());
 
         if (args[0].toLowerCase().equals("all") && args.length == 2) {
 

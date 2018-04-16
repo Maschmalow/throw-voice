@@ -17,7 +17,7 @@ public class EchoCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length != 1) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
@@ -35,7 +35,7 @@ public class EchoCommand implements Command {
                 return;
             }
         } catch (Exception ex) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }

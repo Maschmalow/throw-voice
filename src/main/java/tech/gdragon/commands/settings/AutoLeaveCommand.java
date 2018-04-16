@@ -17,7 +17,7 @@ public class AutoLeaveCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length < 2) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
@@ -31,12 +31,12 @@ public class AutoLeaveCommand implements Command {
                 return;
             }
         } catch (Exception ex) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
 
-        GuildSettings settings = DiscordBot.serverSettings.get(e.getGuild().getId());
+        GuildSettings settings = DiscordBot.settings.get(e.getGuild().getId());
 
         if (args[0].toLowerCase().equals("all") && args.length == 2) {
 

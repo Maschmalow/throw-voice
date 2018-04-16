@@ -15,14 +15,14 @@ public class SaveLocationCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length > 1) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
 
         if (args.length == 0) {
             String id = e.getChannel().getId();
-            DiscordBot.serverSettings.get(e.getGuild().getId()).defaultTextChannel = id;
+            DiscordBot.settings.get(e.getGuild().getId()).defaultTextChannel = id;
             DiscordBot.sendMessage(e.getChannel(), "Now defaulting to the " + e.getChannel().getName() + " text channel");
             DiscordBot.writeSettingsJson();
 
@@ -38,7 +38,7 @@ public class SaveLocationCommand implements Command {
                 return;
             }
             String id = e.getGuild().getTextChannelsByName(args[0], true).get(0).getId();
-            DiscordBot.serverSettings.get(e.getGuild().getId()).defaultTextChannel = id;
+            DiscordBot.settings.get(e.getGuild().getId()).defaultTextChannel = id;
             DiscordBot.sendMessage(e.getChannel(), "Now defaulting to the " + e.getGuild().getTextChannelById(id).getName() + " text channel");
             DiscordBot.writeSettingsJson();
 

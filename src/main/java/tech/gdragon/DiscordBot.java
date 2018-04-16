@@ -1,6 +1,5 @@
 package tech.gdragon;
 
-import com.google.gson.Gson;
 import de.sciss.jump3r.lowlevel.LameEncoder;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.Guild;
@@ -25,6 +24,7 @@ import tech.gdragon.commands.settings.RemoveAliasCommand;
 import tech.gdragon.commands.settings.SaveLocationCommand;
 import tech.gdragon.commands.settings.VolumeCommand;
 import tech.gdragon.configuration.GuildSettings;
+import tech.gdragon.configuration.ServerSettings;
 import tech.gdragon.listeners.AudioReceiveListener;
 import tech.gdragon.listeners.AudioSendListener;
 import tech.gdragon.listeners.EventListener;
@@ -34,7 +34,6 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +44,7 @@ import static java.lang.Thread.sleep;
 
 public class DiscordBot {
     //contains the id of every guild that we are connected to and their corresponding GuildSettings object
-    public static HashMap<String, GuildSettings> serverSettings = new HashMap<>();
+    public static ServerSettings settings;
     public static JDA jda;
 
 
@@ -98,7 +97,7 @@ public class DiscordBot {
         for (VoiceChannel v : vcs) {
             //does current interation beat old biggest?
             if (voiceChannelSize(v) > large) {
-                GuildSettings settings = serverSettings.get(v.getGuild().getId());
+                GuildSettings settings = DiscordBot.settings.get(v.getGuild().getId());
 
                 //we only want servers that beat the autojoin minimum (so we don't have to check later)
                 if (voiceChannelSize(v) >= settings.autoJoinSettings.get(v.getId())) {
@@ -135,7 +134,7 @@ public class DiscordBot {
 
     public static void writeToFile(Guild guild, int time, TextChannel tc) {
         if (tc == null) {
-            tc = guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel);
+            tc = guild.getTextChannelById(settings.get(guild.getId()).defaultTextChannel);
         }
 
         AudioReceiveListener ah = (AudioReceiveListener) guild.getAudioManager().getReceiveHandler();
@@ -173,7 +172,7 @@ public class DiscordBot {
             if (dest.length() / 1024 / 1024 < 8) {
                 final TextChannel channel = tc;
                 tc.sendFile(dest, null).queue(null, (Throwable) -> {
-                    sendMessage(guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel),
+                    sendMessage(guild.getTextChannelById(settings.get(guild.getId()).defaultTextChannel),
                             "I don't have permissions to send files in " + channel.getName() + "!");
                 });
 
@@ -218,7 +217,7 @@ public class DiscordBot {
             if (m.getUser().isBot()) continue;
 
             //check the guild's blacklist and ignore the user if they are on it
-            if (!serverSettings.get(vc.getGuild().getId()).alertBlackList.contains(m.getUser().getId())) {
+            if (!settings.get(vc.getGuild().getId()).alertBlackList.contains(m.getUser().getId())) {
 
                 //make an embeded alert message to warn the user
                 EmbedBuilder embed = new EmbedBuilder();
@@ -305,9 +304,8 @@ public class DiscordBot {
 
     //general purpose function that sends a message to the given text channel and handles errors
     public static void sendMessage(TextChannel tc, String message) {
-        tc.sendMessage("\u200B" + message).queue(null, (Throwable) -> {
-            tc.getGuild().getPublicChannel().sendMessage("\u200BI don't have permissions to send messages in " + tc.getName() + "!").queue();
-        });
+        tc.sendMessage("\u200B" + message).queue(null,
+                (Throwable) -> tc.getGuild().getPublicChannel().sendMessage("\u200BI don't have permissions to send messages in " + tc.getName() + "!").queue());
     }
 
     //general purpose function for joining voice channels while warning and handling errors
@@ -317,7 +315,7 @@ public class DiscordBot {
         //don't join afk channels
         if (vc == vc.getGuild().getAfkChannel()) {
             if (warning) {
-                TextChannel tc = vc.getGuild().getTextChannelById(serverSettings.get(vc.getGuild().getId()).defaultTextChannel);
+                TextChannel tc = vc.getGuild().getTextChannelById(settings.get(vc.getGuild().getId()).defaultTextChannel);
                 sendMessage(tc, "I don't join afk channels!");
             }
         }
@@ -327,7 +325,7 @@ public class DiscordBot {
             vc.getGuild().getAudioManager().openAudioConnection(vc);
         } catch (Exception e) {
             if (warning) {
-                TextChannel tc = vc.getGuild().getTextChannelById(serverSettings.get(vc.getGuild().getId()).defaultTextChannel);
+                TextChannel tc = vc.getGuild().getTextChannelById(settings.get(vc.getGuild().getId()).defaultTextChannel);
                 sendMessage(tc, "I don't have permission to join " + vc.getName() + "!");
                 return;
             }
@@ -337,7 +335,7 @@ public class DiscordBot {
         DiscordBot.alert(vc);
 
         //initalize the audio reciever listener
-        double volume = DiscordBot.serverSettings.get(vc.getGuild().getId()).volume;
+        double volume = DiscordBot.settings.get(vc.getGuild().getId()).volume;
         vc.getGuild().getAudioManager().setReceivingHandler(new AudioReceiveListener(volume, vc));
 
     }

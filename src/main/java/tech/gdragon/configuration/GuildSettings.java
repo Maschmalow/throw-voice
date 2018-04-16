@@ -19,13 +19,7 @@ import java.util.HashMap;
 
 public class GuildSettings {
 
-    private static final String SETTINGS_PATH = ".\\settings.json";
-    private static final String RECORDINGS_PATH = "C:\\www\\maschmalow.net\\DiscordFun\\";
-    static {
-        Path dir = Paths.get(RECORDINGS_PATH);
-        if (Files.notExists(dir))
-            Files.createDirectories(Paths.get(RECORDINGS_PATH));
-    }
+
 
     public HashMap<String, Integer> autoJoinSettings;
     public HashMap<String, Integer> autoLeaveSettings;
@@ -62,44 +56,5 @@ public class GuildSettings {
     }
 
 
-    public static void readSettings() {
-
-        Gson gson = new Gson();
-
-        FileReader fileReader = new FileReader(SETTINGS_PATH);
-
-        Type type = new TypeToken<HashMap<String, GuildSettings>>() {
-        }.getType();
-
-        DiscordBot.serverSettings = gson.fromJson(fileReader, type);
-
-        if (DiscordBot.serverSettings == null)
-            DiscordBot.serverSettings = new HashMap<>();
-
-        fileReader.close();
-
-        boolean update = false; // :(
-        for (Guild g : DiscordBot.jda.getGuilds()) {    //validate settings files
-            if (!DiscordBot.serverSettings.containsKey(g.getId())) {
-                DiscordBot.serverSettings.put(g.getId(), new GuildSettings(g));
-                update = true;
-            }
-        }
-        if(update)
-            GuildSettings.writeSettingsJson();
-
-    }
-
-    //write the current state of all server settings to the settings.json file
-    public static void writeSettingsJson() {
-        Gson gson = new Gson();
-        String json = gson.toJson(DiscordBot.serverSettings);
-
-        FileWriter fw = new FileWriter(SETTINGS_PATH);
-        fw.write(json);
-        fw.flush();
-        fw.close();
-
-    }
 
 }

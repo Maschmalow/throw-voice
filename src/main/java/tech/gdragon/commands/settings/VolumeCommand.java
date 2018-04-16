@@ -15,7 +15,7 @@ public class VolumeCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length != 1) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
@@ -24,18 +24,18 @@ public class VolumeCommand implements Command {
             int num = Integer.parseInt(args[0]);
 
             if (num > 0 && num <= 100) {
-                DiscordBot.serverSettings.get(e.getGuild().getId()).volume = (double) num / 100.0;
+                DiscordBot.settings.get(e.getGuild().getId()).volume = (double) num / 100.0;
                 DiscordBot.writeSettingsJson();
 
                 DiscordBot.sendMessage(e.getChannel(), "Volume set to " + num + "% for next recording!");
 
             } else {
-                String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+                String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
                 DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             }
 
         } catch (Exception ex) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
         }
     }

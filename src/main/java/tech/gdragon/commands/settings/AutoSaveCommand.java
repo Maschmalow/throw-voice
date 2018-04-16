@@ -15,17 +15,17 @@ public class AutoSaveCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length != 0) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
 
-        if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave) {
-            DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave = false;
+        if (DiscordBot.settings.get(e.getGuild().getId()).autoSave) {
+            DiscordBot.settings.get(e.getGuild().getId()).autoSave = false;
             DiscordBot.sendMessage(e.getChannel(), "No longer saving at the end of each session!");
 
         } else {
-            DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave = true;
+            DiscordBot.settings.get(e.getGuild().getId()).autoSave = true;
             DiscordBot.sendMessage(e.getChannel(), "Now saving at the end of each session!");
         }
     }

@@ -16,7 +16,7 @@ public class AliasCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length != 2) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
@@ -31,7 +31,7 @@ public class AliasCommand implements Command {
             return;
         }
 
-        DiscordBot.serverSettings.get(e.getGuild().getId()).aliases.put(args[1].toLowerCase(), args[0].toLowerCase());
+        DiscordBot.settings.get(e.getGuild().getId()).aliases.put(args[1].toLowerCase(), args[0].toLowerCase());
         DiscordBot.writeSettingsJson();
         DiscordBot.sendMessage(e.getChannel(), "New alias '" + args[1].toLowerCase() + "' set for the command '" + args[0].toLowerCase() + "'.");
 

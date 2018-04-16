@@ -15,7 +15,7 @@ public class LeaveCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length != 0) {
-            String prefix = DiscordBot.serverSettings.get(e.getGuild().getId()).prefix;
+            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
             DiscordBot.sendMessage(e.getChannel(), usage(prefix));
             return;
         }
@@ -26,7 +26,7 @@ public class LeaveCommand implements Command {
         }
 
         //write out previous channel's audio if autoSave is on
-        if (DiscordBot.serverSettings.get(e.getGuild().getId()).autoSave)
+        if (DiscordBot.settings.get(e.getGuild().getId()).autoSave)
             DiscordBot.writeToFile(e.getGuild());
 
         DiscordBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
