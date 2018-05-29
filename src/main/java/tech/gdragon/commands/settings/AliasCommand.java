@@ -4,22 +4,17 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
 import tech.gdragon.commands.Command;
 import tech.gdragon.commands.CommandHandler;
+import tech.gdragon.configuration.ServerSettings;
 
 
 public class AliasCommand implements Command {
 
-    @Override
-    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-        return true;
-    }
+
 
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
-        if (args.length != 2) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
-            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-            return;
-        }
+        if (args.length != 2)
+            throw new IllegalArgumentException("This command require exactly two arguments");
 
         if (!CommandHandler.commands.containsKey(args[0].toLowerCase())) {
             DiscordBot.sendMessage(e.getChannel(), "Command '" + args[0].toLowerCase() + "' not found.");
@@ -31,8 +26,8 @@ public class AliasCommand implements Command {
             return;
         }
 
-        DiscordBot.settings.get(e.getGuild().getId()).aliases.put(args[1].toLowerCase(), args[0].toLowerCase());
-        DiscordBot.writeSettingsJson();
+        ServerSettings.get(e.getGuild()).aliases.put(args[1].toLowerCase(), args[0].toLowerCase());
+        ServerSettings.write();
         DiscordBot.sendMessage(e.getChannel(), "New alias '" + args[1].toLowerCase() + "' set for the command '" + args[0].toLowerCase() + "'.");
 
     }
@@ -43,12 +38,9 @@ public class AliasCommand implements Command {
     }
 
     @Override
-    public String descripition() {
+    public String description() {
         return "Creates an alias, or alternate name, to a command for customization.";
     }
 
-    @Override
-    public void executed(boolean success, GuildMessageReceivedEvent e) {
 
-    }
 }

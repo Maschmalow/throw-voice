@@ -9,18 +9,12 @@ import tech.gdragon.listeners.AudioSendListener;
 
 public class EchoCommand implements Command {
 
-    @Override
-    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-        return true;
-    }
+
 
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
-        if (args.length != 1) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
-            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-            return;
-        }
+        if (args.length != 1)
+            throw new IllegalArgumentException("");
 
         if (e.getGuild().getAudioManager().getConnectedChannel() == null) {
             DiscordBot.sendMessage(e.getChannel(), "I wasn't recording!");
@@ -34,11 +28,8 @@ public class EchoCommand implements Command {
                 DiscordBot.sendMessage(e.getChannel(), "Time must be greater than 0");
                 return;
             }
-        } catch (Exception ex) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
-            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-            return;
-        }
+        } catch (Exception ex)
+            throw new IllegalArgumentException("");
 
 
         AudioReceiveListener ah = (AudioReceiveListener) e.getGuild().getAudioManager().getReceiveHandler();
@@ -59,12 +50,9 @@ public class EchoCommand implements Command {
     }
 
     @Override
-    public String descripition() {
+    public String description() {
         return "Echos back the input number of seconds of the recording into the voice channel (max 120 seconds)";
     }
 
-    @Override
-    public void executed(boolean success, GuildMessageReceivedEvent e) {
 
-    }
 }

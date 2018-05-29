@@ -3,31 +3,28 @@ package tech.gdragon.commands.settings;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
 import tech.gdragon.commands.Command;
+import tech.gdragon.configuration.ServerSettings;
+
+import java.util.Map;
 
 
 public class RemoveAliasCommand implements Command {
 
-    @Override
-    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-        return true;
-    }
 
     @Override
-    public void action(String[] args, GuildMessageReceivedEvent e) {
-        if (args.length != 1) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
-            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-            return;
-        }
+    public void action(String[] args, GuildMessageReceivedEvent e) throws IllegalArgumentException {
+        if (args.length != 1)
+            throw new IllegalArgumentException("This command requires exactly one argument");
 
-        if (!DiscordBot.settings.get(e.getGuild().getId()).aliases.containsKey(args[0].toLowerCase())) {
-            DiscordBot.sendMessage(e.getChannel(), "Alias '" + args[0].toLowerCase() + "' does not exist.");
-            return;
-        }
+        String alias = args[0].toLowerCase();
+        Map<String, String> aliases = ServerSettings.get(e.getGuild()).aliases;
 
-        DiscordBot.settings.get(e.getGuild().getId()).aliases.remove(args[0].toLowerCase());
-        DiscordBot.writeSettingsJson();
-        DiscordBot.sendMessage(e.getChannel(), "Alias '" + args[0].toLowerCase() + "' has been removed.");
+        if (!aliases.containsKey(alias))
+            throw new IllegalArgumentException("Alias " + alias + " does not exist.");
+
+        aliases.remove(alias);
+        ServerSettings.write();
+        DiscordBot.sendMessage(e.getChannel(), "Alias '" + alias + "' has been removed.");
 
     }
 
@@ -37,11 +34,8 @@ public class RemoveAliasCommand implements Command {
     }
 
     @Override
-    public String descripition() {
+    public String description() {
         return "Removes an alias from a command.";
     }
 
-    @Override
-    public void executed(boolean success, GuildMessageReceivedEvent e) {
-    }
 }

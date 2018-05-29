@@ -5,6 +5,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
 import tech.gdragon.commands.Command;
 import tech.gdragon.commands.CommandHandler;
+import tech.gdragon.configuration.ServerSettings;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -14,54 +15,43 @@ import java.util.Map;
 
 public class HelpCommand implements Command {
 
-    @Override
-    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-        return true;
-    }
+
 
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
-        if (args.length != 0) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
-            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-            return;
-        }
 
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setAuthor("Throw Voice", "https://github.com/guacamoledragon/throw-voice", e.getJDA().getSelfUser().getAvatarUrl());
+        embed.setAuthor("Throw Voice", "https://github.com/Maschmalow/throw-voice", e.getJDA().getSelfUser().getAvatarUrl());
         embed.setColor(Color.RED);
         embed.setTitle("Currently in beta, being actively developed and tested. Expect bugs.");
-        embed.setDescription("Throw Voice was created from Discord Echo, join their guild for updates - https://discord.gg/JWNFSZJ");
+        embed.setDescription("Throw Voice was created from Discord Echo, join their guild for updates - https://discord.gg/JWNFSZJ\nStripped down & reworked version by Maschmalow");
         embed.setThumbnail("http://www.freeiconspng.com/uploads/information-icon-5.png");
         embed.setFooter("Replace brackets [] with item specified. Vertical bar | means 'or', either side of bar is valid choice.", null);
         embed.addBlankField(false);
 
-        Object[] cmds = CommandHandler.commands.keySet().toArray();
-        Arrays.sort(cmds);
-        for (Object command : cmds) {
-            if (command == "help") continue;
 
-            Command cmd = CommandHandler.commands.get(command);
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
+        for (Command cmd : CommandHandler.commands.values()) {
+
+            String prefix = ServerSettings.get(e.getGuild()).prefix;
 
             ArrayList<String> aliases = new ArrayList<>();
-            for (Map.Entry<String, String> entry : DiscordBot.settings.get(e.getGuild().getId()).aliases.entrySet()) {
+            for (Map.Entry<String, String> entry : ServerSettings.get(e.getGuild()).aliases.entrySet()) {
                 if (entry.getValue().equals(command))
                     aliases.add(entry.getKey());
             }
 
             if (aliases.size() == 0)
-                embed.addField(cmd.usage(prefix), cmd.descripition(), true);
+                embed.addField(cmd.usage(prefix), cmd.description(), true);
             else {
-                String descripition = "";
-                descripition += "Aliases: ";
+                String description = "";
+                description += "Aliases: ";
                 for (String alias : aliases)
-                    descripition += "`" + alias + "`, ";
+                    description += "`" + alias + "`, ";
 
                 //remove extra comma
-                descripition = descripition.substring(0, descripition.lastIndexOf(','));
-                descripition += ". " + cmd.descripition();
-                embed.addField(cmd.usage(prefix), descripition, true);
+                description = description.substring(0, description.lastIndexOf(','));
+                description += ". " + cmd.description();
+                embed.addField(cmd.usage(prefix), description, true);
             }
         }
 
@@ -76,12 +66,9 @@ public class HelpCommand implements Command {
     }
 
     @Override
-    public String descripition() {
+    public String description() {
         return "Shows all commands and their usages";
     }
 
-    @Override
-    public void executed(boolean success, GuildMessageReceivedEvent e) {
 
-    }
 }

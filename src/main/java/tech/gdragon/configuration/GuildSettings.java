@@ -20,19 +20,17 @@ import java.util.HashMap;
 public class GuildSettings {
 
 
-
-    public HashMap<String, Integer> autoJoinSettings;
-    public HashMap<String, Integer> autoLeaveSettings;
+    public int autoJoinSettings;
+    public int autoLeaveSettings;
     public HashMap<String, String> aliases;
     public boolean autoSave;
-    public ArrayList<String> alertBlackList;
     public String prefix;
     public double volume;
     public String defaultTextChannel;
 
     public GuildSettings(Guild g) {
-        this.autoJoinSettings = new HashMap<>(g.getVoiceChannels().size());
-        this.autoLeaveSettings = new HashMap<>(g.getVoiceChannels().size());
+        this.autoJoinSettings = Integer.MAX_VALUE;
+        this.autoLeaveSettings = 1;
         this.aliases = new HashMap<>();
 
         //assign default aliases
@@ -41,20 +39,14 @@ public class GuildSettings {
         this.aliases.put("stop", "leave");
         this.aliases.put("symbol", "prefix");
 
-        for (VoiceChannel vc : g.getVoiceChannels()) {
-            this.autoJoinSettings.put(vc.getId(), Integer.MAX_VALUE);
-            this.autoLeaveSettings.put(vc.getId(), 1);
-        }
 
         this.autoSave = false;
-        this.alertBlackList = new ArrayList<>();
         this.prefix = "!";
         this.volume = 0.8;
-        this.defaultTextChannel = g.getPublicChannel().getId();
+        this.defaultTextChannel = g.getDefaultChannel().getId();
 
 
     }
-
 
 
 }

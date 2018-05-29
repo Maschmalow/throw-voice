@@ -7,29 +7,17 @@ import tech.gdragon.commands.Command;
 
 public class LeaveCommand implements Command {
 
-    @Override
-    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-        return true;
-    }
+
 
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
-        if (args.length != 0) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
-            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-            return;
-        }
+        if (args.length != 0)
+            throw new IllegalArgumentException("This command takes no argument");
 
-        if (!e.getGuild().getAudioManager().isConnected()) {
-            DiscordBot.sendMessage(e.getChannel(), "I am not in a channel!");
-            return;
-        }
+        if (!e.getGuild().getAudioManager().isConnected())
+            throw new IllegalArgumentException("I am not in a channel!");
 
-        //write out previous channel's audio if autoSave is on
-        if (DiscordBot.settings.get(e.getGuild().getId()).autoSave)
-            DiscordBot.writeToFile(e.getGuild());
-
-        DiscordBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
+        DiscordBot.leaveVoiceChannel(e.getGuild());
 
     }
 
@@ -39,12 +27,9 @@ public class LeaveCommand implements Command {
     }
 
     @Override
-    public String descripition() {
+    public String description() {
         return "Force the bot to leave it's current channel";
     }
 
-    @Override
-    public void executed(boolean success, GuildMessageReceivedEvent e) {
 
-    }
 }

@@ -10,7 +10,7 @@ import tech.gdragon.configuration.ServerSettings;
 
 import java.util.Arrays;
 
-import static tech.gdragon.DiscordBot.settings;
+import static tech.gdragon.ServerSettings;
 
 public class AudioReceiveListener implements AudioReceiveHandler {
     public static final double STARTING_MB = 0.5;

@@ -3,25 +3,20 @@ package tech.gdragon.commands.settings;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
 import tech.gdragon.commands.Command;
+import tech.gdragon.configuration.ServerSettings;
 
 
 public class PrefixCommand implements Command {
 
     @Override
-    public Boolean called(String[] args, GuildMessageReceivedEvent e) {
-        return true;
-    }
+    public void action(String[] args, GuildMessageReceivedEvent e) throws IllegalArgumentException {
+        if (args.length != 1)
+            throw new IllegalArgumentException("This command require exactly one argument");
+        if(args[0].length() != 1)
+            throw new IllegalArgumentException("Prefix must be exactly one character");
 
-    @Override
-    public void action(String[] args, GuildMessageReceivedEvent e) {
-        if (args[0].length() != 1 || args.length != 1) {
-            String prefix = DiscordBot.settings.get(e.getGuild().getId()).prefix;
-            DiscordBot.sendMessage(e.getChannel(), usage(prefix));
-            return;
-        }
-
-        DiscordBot.settings.get(e.getGuild().getId()).prefix = args[0];
-        DiscordBot.writeSettingsJson();
+        ServerSettings.get(e.getGuild()).prefix = args[0];
+        ServerSettings.write();
 
         DiscordBot.sendMessage(e.getChannel(), "Command prefix now set to " + args[0]);
     }
@@ -32,12 +27,8 @@ public class PrefixCommand implements Command {
     }
 
     @Override
-    public String descripition() {
+    public String description() {
         return "Sets the prefix for each command to avoid conflict with other bots (Default is '!')";
     }
 
-    @Override
-    public void executed(boolean success, GuildMessageReceivedEvent e) {
-
-    }
 }
