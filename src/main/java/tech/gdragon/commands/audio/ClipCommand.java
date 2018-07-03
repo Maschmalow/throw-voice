@@ -3,6 +3,7 @@ package tech.gdragon.commands.audio;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
+import tech.gdragon.Utilities;
 import tech.gdragon.commands.Command;
 import tech.gdragon.configuration.ServerSettings;
 
@@ -13,37 +14,18 @@ public class ClipCommand implements Command {
 
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
-        if (args.length != 1 && args.length != 2) {
-            DiscordBot.sendMessage(e.getChannel(), ServerSettings.get(e.getGuild().getId()).prefix + usage(ServerSettings.get(e.getGuild().getId()).prefix));
-            return;
-        }
+        if (args.length != 1 && args.length != 2)
+            throw new IllegalArgumentException("This command require either one or two arguments");
 
         if (e.getGuild().getAudioManager().getConnectedChannel() == null) {
-            DiscordBot.sendMessage(e.getChannel(), "I wasn't recording!");
+            Utilities.sendMessage(e.getChannel(), "I wasn't recording!");
             return;
         }
 
-        //cut off # in channel name if they included it
-        if (args.length == 2 && args[1].startsWith("#")) {
-            args[1] = args[1].substring(1);
-        }
+        TextChannel destChannel = Utilities.findTextChannel(args.length == 2? args[1] : null, e);
 
-        if (args.length == 2 && e.getGuild().getTextChannelsByName(args[1], true).size() == 0) {
-            DiscordBot.sendMessage(e.getChannel(), "Cannot find specified text channel");
-            return;
-        }
+        int time = Utilities.parseUInt(args[0]);
 
-        int time;
-        try {
-            time = Integer.parseInt(args[0]);
-        } catch (Exception ex) {
-            throw new IllegalArgumentException("Invalid Time argument");
-        }
-
-        if (time <= 0)
-            throw new IllegalArgumentException("Time must be greater than 0");
-
-        TextChannel destChannel = (args.length == 2)? e.getGuild().getTextChannelsByName(args[1], true).get(0): e.getChannel();
         DiscordBot.writeToFile(e.getGuild(), destChannel, time);
 
 

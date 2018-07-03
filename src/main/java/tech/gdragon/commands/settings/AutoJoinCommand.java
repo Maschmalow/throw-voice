@@ -23,9 +23,9 @@ public class AutoJoinCommand implements Command {
         ServerSettings.write();
 
         if(num != Integer.MAX_VALUE)
-            DiscordBot.sendMessage(e.getChannel(), "Will now automatically join any voice channel with " + num + " people");
+            Utilities.sendMessage(e.getChannel(), "Will now automatically join any voice channel with " + num + " people");
         else
-            DiscordBot.sendMessage(e.getChannel(), "Will no longer automatically join any channel");
+            Utilities.sendMessage(e.getChannel(), "Will no longer automatically join any channel");
 
     }
 

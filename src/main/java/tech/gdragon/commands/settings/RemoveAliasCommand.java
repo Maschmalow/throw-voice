@@ -24,7 +24,7 @@ public class RemoveAliasCommand implements Command {
 
         aliases.remove(alias);
         ServerSettings.write();
-        DiscordBot.sendMessage(e.getChannel(), "Alias '" + alias + "' has been removed.");
+        Utilities.sendMessage(e.getChannel(), "Alias '" + alias + "' has been removed.");
 
     }
 

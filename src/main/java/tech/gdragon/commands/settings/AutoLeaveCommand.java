@@ -20,7 +20,7 @@ public class AutoLeaveCommand implements Command {
         ServerSettings.get(e.getGuild()).autoLeaveSettings = num;
         ServerSettings.write();
 
-        DiscordBot.sendMessage(e.getChannel(), "Will now automatically leave any voice channel with " + num + " people");
+        Utilities.sendMessage(e.getChannel(), "Will now automatically leave any voice channel with " + num + " people");
     }
 
     @Override

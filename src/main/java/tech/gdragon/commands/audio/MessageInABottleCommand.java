@@ -3,6 +3,7 @@ package tech.gdragon.commands.audio;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import tech.gdragon.DiscordBot;
+import tech.gdragon.Utilities;
 import tech.gdragon.commands.Command;
 import tech.gdragon.commands.CommandHandler;
 
@@ -19,19 +20,12 @@ public class MessageInABottleCommand implements Command {
             throw new IllegalArgumentException("");
 
         if (e.getGuild().getAudioManager().getConnectedChannel() == null) {
-            DiscordBot.sendMessage(e.getChannel(), "I wasn't recording!");
+            Utilities.sendMessage(e.getChannel(), "I wasn't recording!");
             return;
         }
 
-        int time;
-        try {
-            time = Integer.parseInt(args[0]);
-            if (time <= 0) {
-                DiscordBot.sendMessage(e.getChannel(), "Time must be greater than 0");
-                return;
-            }
-        } catch (Exception ex)
-            throw new IllegalArgumentException("");
+
+        int time = Utilities.parseUInt(args[0]);
 
         String name = "";
         for (int i = 1; i < args.length; i++) {
@@ -40,7 +34,7 @@ public class MessageInABottleCommand implements Command {
         name = name.substring(0, name.length() - 1);
 
         if (e.getGuild().getVoiceChannelsByName(name, true).size() == 0) {
-            DiscordBot.sendMessage(e.getChannel(), "Cannot find voice channel '" + name + "'.");
+            Utilities.sendMessage(e.getChannel(), "Cannot find voice channel '" + name + "'.");
             return;
         }
 
@@ -50,7 +44,7 @@ public class MessageInABottleCommand implements Command {
         try {
             e.getGuild().getAudioManager().openAudioConnection(newVC);
         } catch (Exception ex) {
-            DiscordBot.sendMessage(e.getChannel(), "I don't have permission to join " + newVC.getName() + "!");
+            Utilities.sendMessage(e.getChannel(), "I don't have permission to join " + newVC.getName() + "!");
             return;
         }
 
@@ -59,13 +53,14 @@ public class MessageInABottleCommand implements Command {
         new Thread(() -> {
             try {
                 sleep(1000 * time);
-            } catch (Exception ex) {
+            } catch(InterruptedException exception) {
+                throw new RuntimeException(exception);
             }
 
             try {
                 e.getGuild().getAudioManager().openAudioConnection(originalVC);
             } catch (Exception ex) {
-                DiscordBot.sendMessage(e.getChannel(), "I don't have permission to join " + originalVC.getName() + "!");
+                Utilities.sendMessage(e.getChannel(), "I don't have permission to join " + originalVC.getName() + "!");
             }
 
         }).start();

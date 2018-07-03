@@ -17,18 +17,18 @@ public class AliasCommand implements Command {
             throw new IllegalArgumentException("This command require exactly two arguments");
 
         if (!CommandHandler.commands.containsKey(args[0].toLowerCase())) {
-            DiscordBot.sendMessage(e.getChannel(), "Command '" + args[0].toLowerCase() + "' not found.");
+            Utilities.sendMessage(e.getChannel(), "Command '" + args[0].toLowerCase() + "' not found.");
             return;
         }
 
         if (CommandHandler.commands.containsValue(args[1].toLowerCase())) {
-            DiscordBot.sendMessage(e.getChannel(), "Alias '" + args[1].toLowerCase() + "' already exists.");
+            Utilities.sendMessage(e.getChannel(), "Alias '" + args[1].toLowerCase() + "' already exists.");
             return;
         }
 
         ServerSettings.get(e.getGuild()).aliases.put(args[1].toLowerCase(), args[0].toLowerCase());
         ServerSettings.write();
-        DiscordBot.sendMessage(e.getChannel(), "New alias '" + args[1].toLowerCase() + "' set for the command '" + args[0].toLowerCase() + "'.");
+        Utilities.sendMessage(e.getChannel(), "New alias '" + args[1].toLowerCase() + "' set for the command '" + args[0].toLowerCase() + "'.");
 
     }
 

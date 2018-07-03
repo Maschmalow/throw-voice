@@ -18,7 +18,7 @@ public class PrefixCommand implements Command {
         ServerSettings.get(e.getGuild()).prefix = args[0];
         ServerSettings.write();
 
-        DiscordBot.sendMessage(e.getChannel(), "Command prefix now set to " + args[0]);
+        Utilities.sendMessage(e.getChannel(), "Command prefix now set to " + args[0]);
     }
 
     @Override

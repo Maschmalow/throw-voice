@@ -1,4 +1,4 @@
-package tech.gdragon.listeners;
+package tech.gdragon.audio;
 
 import net.dv8tion.jda.core.audio.AudioSendHandler;
 

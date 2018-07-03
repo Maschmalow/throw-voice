@@ -20,7 +20,7 @@ public class SaveLocationCommand implements Command {
 
         ServerSettings.get(e.getGuild()).defaultTextChannel = newDefault.getId();
         ServerSettings.write();
-        DiscordBot.sendMessage(e.getChannel(), "Now defaulting to the " + e.getChannel().getName() + " text channel");
+        Utilities.sendMessage(e.getChannel(), "Now defaulting to the " + e.getChannel().getName() + " text channel");
 
     }
 

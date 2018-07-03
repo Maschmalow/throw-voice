@@ -27,7 +27,7 @@ public class VolumeCommand implements Command {
         ServerSettings.get(e.getGuild()).volume = (double) num / 100.0;
         ServerSettings.write();
 
-        DiscordBot.sendMessage(e.getChannel(), "Volume set to " + num + "% for next recording!");
+        Utilities.sendMessage(e.getChannel(), "Volume set to " + num + "% for next recording!");
 
 
     }

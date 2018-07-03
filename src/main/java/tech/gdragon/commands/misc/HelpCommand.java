@@ -55,7 +55,7 @@ public class HelpCommand implements Command {
             }
         }
 
-        DiscordBot.sendMessage(e.getChannel(), "Check your DM's!");
+        Utilities.sendMessage(e.getChannel(), "Check your DM's!");
 
         e.getAuthor().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(embed.build()).queue());
     }

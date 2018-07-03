@@ -11,14 +11,14 @@ public class AutoSaveCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if (args.length != 0)
-            DiscordBot.sendMessage(e.getChannel(), "Warning: this commands takes no argument, the provided ones are ignored");
+            Utilities.sendMessage(e.getChannel(), "Warning: this commands takes no argument, the provided ones are ignored");
 
         ServerSettings.get(e.getGuild()).autoSave = !ServerSettings.get(e.getGuild()).autoSave;
 
         if (ServerSettings.get(e.getGuild()).autoSave)
-            DiscordBot.sendMessage(e.getChannel(), "No longer saving at the end of each session!");
+            Utilities.sendMessage(e.getChannel(), "No longer saving at the end of each session!");
         else
-            DiscordBot.sendMessage(e.getChannel(), "Now saving at the end of each session!");
+            Utilities.sendMessage(e.getChannel(), "Now saving at the end of each session!");
 
     }
 

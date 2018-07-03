@@ -1,4 +1,4 @@
-package tech.gdragon.listeners;
+package tech.gdragon;
 
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.VoiceChannel;
@@ -8,9 +8,7 @@ import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import tech.gdragon.DiscordBot;
+import tech.gdragon.audio.AudioProcessing;
 import tech.gdragon.commands.CommandHandler;
 import tech.gdragon.configuration.GuildSettings;
 import tech.gdragon.configuration.ServerSettings;
@@ -19,8 +17,6 @@ import java.util.List;
 
 
 public class EventListener extends ListenerAdapter {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void onGuildJoin(GuildJoinEvent e) {
@@ -54,9 +50,9 @@ public class EventListener extends ListenerAdapter {
         }
 
         if(toJoin != null && toJoin != currentChannel) {
-            DiscordBot.joinVoiceChannel(toJoin);
+            AudioProcessing.joinVoiceChannel(toJoin);
         } else if(currentChannel != null && voiceChannelSize(currentChannel) <= settings.autoLeaveSettings) {
-            DiscordBot.leaveVoiceChannel(e.getGuild());
+            AudioProcessing.leaveVoiceChannel(e.getGuild());
         }
 
     }

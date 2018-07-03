@@ -13,10 +13,12 @@ public class SaveCommand implements Command {
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
         if(args.length > 1)
-            throw new IllegalArgumentException("This command require no more than two arguments");
+            throw new IllegalArgumentException("This command require no more than one argument");
 
-        if(e.getGuild().getAudioManager().getConnectedChannel() == null)
-            throw new IllegalArgumentException("I wasn't recording!");
+        if(e.getGuild().getAudioManager().getConnectedChannel() == null){
+            Utilities.sendMessage(e.getChannel(), "I wasn't recording!");
+            return;
+        }
 
 
         TextChannel savingChannel = Utilities.findTextChannel((args.length == 0) ? null : args[0], e);
